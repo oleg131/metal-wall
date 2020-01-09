@@ -1,0 +1,24 @@
+{
+  "files": {
+    "main.css": "/metal-wall/static/css/main.5e385ff3.chunk.css",
+    "main.js": "/metal-wall/static/js/main.92829f3f.chunk.js",
+    "main.js.map": "/metal-wall/static/js/main.92829f3f.chunk.js.map",
+    "runtime-main.js": "/metal-wall/static/js/runtime-main.6336aa32.js",
+    "runtime-main.js.map": "/metal-wall/static/js/runtime-main.6336aa32.js.map",
+    "static/css/2.64a99b10.chunk.css": "/metal-wall/static/css/2.64a99b10.chunk.css",
+    "static/js/2.e3611e03.chunk.js": "/metal-wall/static/js/2.e3611e03.chunk.js",
+    "static/js/2.e3611e03.chunk.js.map": "/metal-wall/static/js/2.e3611e03.chunk.js.map",
+    "index.html": "/metal-wall/index.html",
+    "precache-manifest.647c099467f21b0e044afd1ee44f9ead.js": "/metal-wall/precache-manifest.647c099467f21b0e044afd1ee44f9ead.js",
+    "service-worker.js": "/metal-wall/service-worker.js",
+    "static/css/2.64a99b10.chunk.css.map": "/metal-wall/static/css/2.64a99b10.chunk.css.map",
+    "static/css/main.5e385ff3.chunk.css.map": "/metal-wall/static/css/main.5e385ff3.chunk.css.map"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.6336aa32.js",
+    "static/css/2.64a99b10.chunk.css",
+    "static/js/2.e3611e03.chunk.js",
+    "static/css/main.5e385ff3.chunk.css",
+    "static/js/main.92829f3f.chunk.js"
+  ]
+}
