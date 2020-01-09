@@ -1,5 +1,4 @@
 import React, { Fragment, useState, useEffect } from 'react';
-import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import ReactImageFallback from "react-image-fallback";
 import moment from 'moment';
@@ -29,11 +28,7 @@ function Header() {
 
 function Main() {
   return (
-    <BrowserRouter>
-      <Switch>
-        <Route exact path="/" component={ Home } />
-      </Switch>
-    </BrowserRouter>
+    <Home />
   );
 }
 
@@ -122,7 +117,7 @@ function Home() {
         next={ () => fetchData(start) }
         hasMore={ hasMore }
         loader="Loading"
-        endMessage="The end"
+        endMessage="The End (These are albums for the past year. Enjoy!)"
       >
           <div className="text-center">
             {
