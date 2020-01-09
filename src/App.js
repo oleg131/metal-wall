@@ -6,8 +6,7 @@ import moment from 'moment';
 
 import './App.css';
 
-const CORST_HOST = 'http://localhost:8080/'
-
+const CORS_HOST = process.env.REACT_APP_CORS_HOST || 'http://localhost:8080/'
 
 function App() {
   return (
@@ -45,7 +44,7 @@ function Home() {
   
   useEffect(() => {
     fetchData(start);
-  }, [start])
+  }, [])
 
   function processData(data) {
     const m = data[2].match('<!-- (.+) -->');
@@ -77,7 +76,7 @@ function Home() {
 
     const [fromYear, fromMonth, toYear, toMonth] = [year - 1, month, year, month];
 
-    const url = CORST_HOST + `https://www.metal-archives.com/search
+    const url = CORS_HOST + `https://www.metal-archives.com/search
     /ajax-advanced/searching/albums/?bandName=&releaseTitle=
     &releaseYearFrom=${fromYear}&releaseMonthFrom=${fromMonth}
     &releaseYearTo=${toYear}&releaseMonthTo=${toMonth}

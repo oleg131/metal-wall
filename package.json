@@ -20,7 +20,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "REACT_APP_CORS_HOST=https://cors-anywhere.herokuapp.com/ npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -37,5 +39,9 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:5000"
+  "proxy": "http://localhost:5000",
+  "devDependencies": {
+    "gh-pages": "^2.2.0"
+  },
+  "homepage": "http://oleg131.github.io/metal-wall"
 }
