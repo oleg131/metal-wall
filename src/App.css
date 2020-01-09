@@ -20,3 +20,75 @@
 .App-link {
   color: #09d3ac;
 }
+
+.thumbnail {
+  width: 120px;
+  height: 120px;
+  border: none;
+  display: inline-block;
+}
+
+.empty-thumbnail {
+  width: 0px !important;
+  height: 0px !important;
+}
+
+.dull {
+  opacity: 0.4;
+}
+
+.modal-overlay {
+  top: 10%;
+  left: 15%;
+  right: 15%;
+  bottom: 25%
+}
+
+.zoom:hover {
+  transform: scale(1.75);
+  transition-duration: 0.3s;
+  z-index: 1;
+  position: relative;
+}
+
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
+}
+
+.thumbnail-image:hover {
+  border-radius: 10px;
+}
+
+.ReactModal__Content {
+  position: fixed !important;
+  bottom: 0px !important;
+  left: 10px !important;
+  margin: 0px !important;
+  right: 60% !important;
+  top: 65% !important;
+  background: #000000 !important;
+  z-index: 2 !important;
+  border-left: 0px !important;
+  border-bottom: 0px !important;
+  border-right: 0px !important;
+  border-top: 10px solid rgba(7, 49, 54, 0.7) !important;
+  border-radius: 0px 0px 0px 0px !important;
+}
+
+.ReactModal__Overlay {
+  background-color: rgba(0, 0, 0, 0) !important;
+  position: static !important
+}
+
+.date-album {
+  line-height: 30px;
+  padding: 15px;  
+  color: #999;
+  /* font-weight: 500     */
+}
+
+.date-album-inner {
+  border: 2px solid #fff;
+  border-radius: 7px;
+}
