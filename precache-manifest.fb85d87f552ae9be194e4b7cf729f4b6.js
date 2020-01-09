@@ -1,23 +1,23 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "767e650e512f5ec2dac396aa5ad909cc",
+    "revision": "14167934416e35367bdd2948d95d6d40",
     "url": "/metal-wall/index.html"
   },
   {
-    "revision": "ecee03edd3a60dc97630",
+    "revision": "2aec9ad07700b6d5d981",
     "url": "/metal-wall/static/css/2.64a99b10.chunk.css"
   },
   {
-    "revision": "67f02bd291442c569a26",
+    "revision": "031d026a5202dafd046f",
     "url": "/metal-wall/static/css/main.5e385ff3.chunk.css"
   },
   {
-    "revision": "ecee03edd3a60dc97630",
-    "url": "/metal-wall/static/js/2.e3611e03.chunk.js"
+    "revision": "2aec9ad07700b6d5d981",
+    "url": "/metal-wall/static/js/2.43d37161.chunk.js"
   },
   {
-    "revision": "67f02bd291442c569a26",
-    "url": "/metal-wall/static/js/main.92829f3f.chunk.js"
+    "revision": "031d026a5202dafd046f",
+    "url": "/metal-wall/static/js/main.69c6ce58.chunk.js"
   },
   {
     "revision": "37078f3542174705ce25",
