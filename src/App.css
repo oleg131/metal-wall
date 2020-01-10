@@ -21,12 +21,16 @@
   color: #09d3ac;
 }
 
+.header {
+  font-family: Oswald, serif;
+}
+
 .thumbnail {
   border: none;
   display: inline-block;
 }
 
-.empty-thumbnail {
+.empty {
   width: 0px !important;
   height: 0px !important;
 }

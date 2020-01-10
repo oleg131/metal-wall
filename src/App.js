@@ -6,12 +6,13 @@ import moment from 'moment';
 import './App.css';
 
 const CORS_HOST = process.env.REACT_APP_CORS_HOST || 'http://localhost:8080/'
+const THUMBNAIL_SIZE = 120;
 
 function App() {
   return (
     <div>
       <Header />
-      <Main />
+      <Home />
     </div>
   );
 }
@@ -19,17 +20,11 @@ function App() {
 function Header() {
   return (
     <div className="text-center my-5">
-      <h2 style={{'font-family': 'Oswald'}}>
+      <h2 className="header">
         Wall of latest metal releases. Powered by Metal Archives, YouTube and React.
       </h2>
     </div>
   )
-}
-
-function Main() {
-  return (
-    <Home />
-  );
 }
 
 function Home() {
@@ -40,6 +35,66 @@ function Home() {
   useEffect(() => {
     fetchData(start);
   }, [])
+  
+  function fetchData(displayStart) {
+    const today = moment();
+
+    const month = today.month() + 1;
+    const year = today.year();
+
+    const displayLength = 200;
+
+    const [fromYear, fromMonth, toYear, toMonth] = [year - 1, month, year, month];
+
+    const url = CORS_HOST + `https://www.metal-archives.com/search
+    /ajax-advanced/searching/albums/?bandName=&releaseTitle=
+    &releaseYearFrom=${fromYear}&releaseMonthFrom=${fromMonth}
+    &releaseYearTo=${toYear}&releaseMonthTo=${toMonth}
+    &country=&location=&releaseLabelName=&releaseCatalogNumber=&releaseIdentifiers=
+    &releaseRecordingInfo=&releaseDescription=&releaseNotes=&genre=&releaseType[]=1
+    &sEcho=1&iColumns=3&sColumns=&iDisplayStart=DISPLAYSTART
+    &iDisplayLength=${displayLength}`.replace(/\n/g, '').replace(/ /g, '')
+
+    if (!displayStart) {
+      console.log('fetch initial')
+
+      fetch(url.replace('DISPLAYSTART', 0))
+        .then(res => res.json())
+        .then(function(data) {
+          fetchData(data.iTotalRecords - displayLength)
+        })
+    } else {
+      console.log('fetch with start', displayStart)
+
+      fetch(url.replace('DISPLAYSTART', displayStart))
+        .then(res => res.json())
+        .then(function(data) {
+          setStart(displayStart - displayLength);
+
+          if (data.aaData.length === 0) {
+            sethasMore(false);
+            return
+          }
+
+          data = data.aaData.map(processData).filter(a => !!a);
+          data = data.filter(a => a.date <= moment().format("YYYY-MM-DD"));
+          data.sort((a, b) => a.date < b.date).reverse();
+
+          data = items.concat(data);
+
+          setItems(data); 
+          console.log('fetched', data.length)
+
+          // Load enough items for infinite scrolling to work
+          const n_col = Math.floor(window.innerWidth / THUMBNAIL_SIZE);
+          const n_row = Math.ceil(2 * window.innerHeight / THUMBNAIL_SIZE);
+          const n_load = n_col * n_row;
+          if (data.length < n_load) {
+            fetchData(displayStart - displayLength)
+          }
+        })
+    }
+  }
 
   function processData(data) {
     const m = data[2].match('<!-- (.+) -->');
@@ -66,71 +121,12 @@ function Home() {
     }
   }
 
-  function fetchData(displayStart) {
-    const today = moment();
-
-    const month = today.month() + 1;
-    const year = today.year();
-
-    const [fromYear, fromMonth, toYear, toMonth] = [year - 1, month, year, month];
-
-    const url = CORS_HOST + `https://www.metal-archives.com/search
-    /ajax-advanced/searching/albums/?bandName=&releaseTitle=
-    &releaseYearFrom=${fromYear}&releaseMonthFrom=${fromMonth}
-    &releaseYearTo=${toYear}&releaseMonthTo=${toMonth}
-    &country=&location=&releaseLabelName=&releaseCatalogNumber=&releaseIdentifiers=
-    &releaseRecordingInfo=&releaseDescription=&releaseNotes=&genre=&releaseType[]=1
-    &sEcho=1&iColumns=3&sColumns=&iDisplayStart=DISPLAYSTART
-    &iDisplayLength=200`.replace(/\n/g, '').replace(/ /g, '')
-
-    if (!displayStart) {
-      console.log('fetch initial')
-
-      fetch(url.replace('DISPLAYSTART', 0))
-        .then(res => res.json())
-        .then(function(data) {
-          fetchData(data.iTotalRecords - 200)
-        })
-    } else {
-      console.log('fetch with start', displayStart)
-
-      fetch(url.replace('DISPLAYSTART', displayStart))
-        .then(res => res.json())
-        .then(function(data) {
-          setStart(displayStart - 200);
-
-          if (data.aaData.length === 0) {
-            sethasMore(false);
-            return
-          }
-
-          data = data.aaData.map(processData).filter(a => !!a);
-          data = data.filter(a => a.date <= moment().format("YYYY-MM-DD"));
-          data.sort((a, b) => a.date < b.date).reverse();
-
-          data = items.concat(data);
-
-          setItems(data); 
-          console.log('fetched', data.length)
-
-          // Load enough items for infinite scrolling to work
-          const n_col = Math.floor(window.innerWidth / 120);
-          const n_row = Math.ceil(2 * window.innerHeight / 120);
-          const n_load = n_col * n_row;
-
-          if (data.length < n_load) {
-            fetchData(displayStart - 200)
-          }
-        })
-    }
-  }
-
   return (
     <main role="main" className="container-fluid text-center px-0">      
       <InfiniteScroll
-        dataLength={ items.length } //This is important field to render the next data
-        next={ () => fetchData(start) }
-        hasMore={ hasMore }
+        dataLength={items.length} //This is important field to render the next data
+        next={() => fetchData(start)}
+        hasMore={hasMore}
         loader="Loading"
         endMessage="The End (These are albums for the past year. Enjoy!)"
       >
@@ -150,7 +146,6 @@ function Home() {
 }
 
 function Album({ data }) {
-
   const [className, setClassName] = useState("thumbnail zoom");
   const width = useWindowWidth();
 
@@ -165,7 +160,7 @@ function Album({ data }) {
       };
     });
     
-    return width / (Math.floor(width / 120));
+    return width / (Math.floor(width / THUMBNAIL_SIZE));
   }
   
   return (
@@ -177,7 +172,7 @@ function Album({ data }) {
           src={data.cover + 'jpg'}
           fallbackImage={[
             data.cover + 'jpeg', 
-            <Empty onLoad={ () => setClassName(className + ' empty-thumbnail') } />
+            <Empty onLoad={ () => setClassName(className + ' empty') } />
           ]}
           className="thumbnail-image"
         />
@@ -187,7 +182,7 @@ function Album({ data }) {
 }
 
 function Empty({ onLoad }) {
-  useEffect(() => onLoad())
+  useEffect(onLoad)
   return (
     <Fragment />
   )
