@@ -10,7 +10,7 @@ const CORS_HOST = process.env.REACT_APP_CORS_HOST || 'http://localhost:8080/'
 function App() {
   return (
     <div>
-      {/* <Header /> */}
+      <Header />
       <Main />
     </div>
   );
@@ -18,9 +18,9 @@ function App() {
 
 function Header() {
   return (
-    <div className="text-center">
-      <h2 style={{'font-family': 'Georgia'}}>
-        Latest metal releases
+    <div className="text-center my-5">
+      <h2 style={{'font-family': 'Oswald'}}>
+        Wall of latest metal releases. Powered by Metal Archives, YouTube and React.
       </h2>
     </div>
   )
@@ -43,6 +43,9 @@ function Home() {
 
   function processData(data) {
     const m = data[2].match('<!-- (.+) -->');
+    if (!m) {
+      return null
+    }
     const date = m[1];
 
     const el0 = document.createElement('html');
@@ -101,17 +104,29 @@ function Home() {
             return
           }
 
-          data = data.aaData.map(processData);
+          data = data.aaData.map(processData).filter(a => !!a);
           data = data.filter(a => a.date <= moment().format("YYYY-MM-DD"));
           data.sort((a, b) => a.date < b.date).reverse();
-          setItems(items.concat(data)); 
+
+          data = items.concat(data);
+
+          setItems(data); 
           console.log('fetched', data.length)
+
+          // Load enough items for infinite scrolling to work
+          const n_col = Math.floor(window.innerWidth / 120);
+          const n_row = Math.ceil(2 * window.innerHeight / 120);
+          const n_load = n_col * n_row;
+
+          if (data.length < n_load) {
+            fetchData(displayStart - 200)
+          }
         })
     }
   }
 
   return (
-    <main role="main" className="container-fluid text-center">      
+    <main role="main" className="container-fluid text-center px-0">      
       <InfiniteScroll
         dataLength={ items.length } //This is important field to render the next data
         next={ () => fetchData(start) }
@@ -137,9 +152,24 @@ function Home() {
 function Album({ data }) {
 
   const [className, setClassName] = useState("thumbnail zoom");
+  const width = useWindowWidth();
+
+  function useWindowWidth() {
+    const [width, setWidth] = useState(window.innerWidth);
+    
+    useEffect(() => {
+      const handleResize = () => setWidth(window.innerWidth);
+      window.addEventListener('resize', handleResize);
+      return () => {
+        window.removeEventListener('resize', handleResize);
+      };
+    });
+    
+    return width / (Math.floor(width / 120));
+  }
   
   return (
-    <div className={className}>
+    <div className={className} style={{width: width, height: width}}>
       <a 
         href={"https://www.youtube.com/results?search_query=" + data.artist + " " + data.album} 
         target="_blank" rel="noopener noreferrer">
