@@ -82,8 +82,9 @@ function Home() {
 
           data = items.concat(data);
 
-          setItems(data); 
           console.log('fetched', data.length)
+
+          setItems(data); 
 
           // Load enough items for infinite scrolling to work
           const n_col = Math.floor(window.innerWidth / THUMBNAIL_SIZE);
