@@ -132,13 +132,15 @@ function Home() {
         endMessage="The End (These are albums for the past year. Enjoy!)"
         style={{overflow: 'visible'}}
       >
-        {
-          items.map(
-            (item, index) => (
-              <Album data={item} key={index} />
+        <div className="text-center">
+          {
+            items.map(
+              (item, index) => (
+                <Album data={item} key={index} />
+              )
             )
-          )
-        }
+          }
+        </div>
 
       </InfiniteScroll>
     </main>
