@@ -130,16 +130,15 @@ function Home() {
         hasMore={hasMore}
         loader="Loading"
         endMessage="The End (These are albums for the past year. Enjoy!)"
+        style={{overflow: 'visible'}}
       >
-          <div className="text-center">
-            {
-              items.map(
-                (item, index) => (
-                  <Album data={item} key={index} />
-                )
-              )
-            }
-          </div>
+        {
+          items.map(
+            (item, index) => (
+              <Album data={item} key={index} />
+            )
+          )
+        }
 
       </InfiniteScroll>
     </main>
