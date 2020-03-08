@@ -192,7 +192,7 @@ function Album({ data }) {
       <a
         href={
           "https://www.youtubelongplays.com/results?search_query="
-          + data.artist + " " + data.album
+          + data.artist + " " + data.album + ''
         }
         target="_blank" rel="noopener noreferrer">
         <ReactImageFallback
