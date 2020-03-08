@@ -190,7 +190,10 @@ function Album({ data }) {
   return (
     <div className={className} style={{width: width, height: width}}>
       <a
-        href={"https://www.youtube.com/results?search_query=" + data.artist + " " + data.album}
+        href={
+          "https://www.youtubelongplays.com/results?search_query="
+          + data.artist + " " + data.album
+        }
         target="_blank" rel="noopener noreferrer">
         <ReactImageFallback
           initialImage={ placeholderImage }
