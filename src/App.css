@@ -47,7 +47,10 @@
 }
 
 .zoom:hover {
-  transform: scale3d(1.75, 1.75, 1);
+  /* transform: scale3d(3.75, 3.75, 1); */
+  transform: scale(1.75);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   transition-duration: 0.3s;
   z-index: 1;
   position: relative;
