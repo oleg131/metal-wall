@@ -4,6 +4,7 @@ import ReactImageFallback from "react-image-fallback";
 import moment from 'moment';
 
 import './App.css';
+import placeholderImage from './0.png';
 
 const CORS_HOST = process.env.REACT_APP_CORS_HOST || 'http://localhost:8080/'
 const THUMBNAIL_SIZE = 120;
@@ -51,52 +52,69 @@ function Home() {
   const n_load = n_col * n_row;
 
   useEffect(() => {
-    if (items.length < n_load) {
-      fetchData()
-    }
+    console.log('loading init n', n_load)
+    fetchInit().then(total => {
+      const initItems = [];
+      fetchItems(total - displayLength, initItems);
+    })
   }, [])
 
+  useEffect(() => {
+    console.log('items', items.length)
+  }, [items])
+
+  function fetchItems(displayStart, items) {
+    fetchData(displayStart)
+      .then(data => {
+        items.push(...data)
+        if (items.length < n_load) {
+          fetchItems(displayStart - displayLength, items)
+        } else {
+          setItems(items)
+          setStart(displayStart - displayLength)
+        }
+      })
+  }
+
+  function fetchInit() {
+    console.log('fetch initial')
+    return fetch(url.replace('DISPLAYSTART', 0))
+      .then(res => res.json())
+      .then(function(data) {
+        return data.iTotalRecords
+      })
+  }
+
   function fetchData(displayStart) {
-    if (!displayStart) {
-      console.log('fetch initial')
+    console.log('fetch with start', displayStart)
+    return fetch(url.replace('DISPLAYSTART', displayStart))
+      .then(res => res.json())
+      .then(function(data) {
+        if (data.aaData.length === 0) {
+          return []
+        }
 
-      fetch(url.replace('DISPLAYSTART', 0))
-        .then(res => res.json())
-        .then(function(data) {
-          fetchData(data.iTotalRecords - displayLength)
-        })
-    } else {
-      console.log('fetch with start', displayStart)
+        data = data.aaData.map(processData).filter(a => !!a);
+        data = data.filter(a => a.date <= moment().format("YYYY-MM-DD"));
+        data.sort((a, b) => a.date < b.date).reverse();
+        console.log('fetched', data.length)
 
-      fetch(url.replace('DISPLAYSTART', displayStart))
-        .then(res => res.json())
-        .then(function(data) {
-          setStart(displayStart - displayLength);
+        return data
+      })
+  }
 
-          if (data.aaData.length === 0) {
-            sethasMore(false);
-            return
-          }
-
-          data = data.aaData.map(processData).filter(a => !!a);
-          data = data.filter(a => a.date <= moment().format("YYYY-MM-DD"));
-          data.sort((a, b) => a.date < b.date).reverse();
-
-          data = items.concat(data);
-
-          console.log('fetched', data.length)
-
-          setItems(data);
-
-          // Load enough items for infinite scrolling to work
-          // const n_col = Math.floor(window.innerWidth / THUMBNAIL_SIZE);
-          // const n_row = Math.ceil(2 * window.innerHeight / THUMBNAIL_SIZE);
-          // const n_load = n_col * n_row;
-          // if (data.length < n_load) {
-          //   fetchData(displayStart - displayLength)
-          // }
-        })
-    }
+  function fetchScroll(displayStart) {
+    fetchData(displayStart)
+      .then(data => {
+        if (!data.length) {
+          sethasMore(false)
+        } else {
+          setItems(items => (
+            items.slice().concat(data)//.sort((a, b) => a.date < b.date).reverse()
+          ))
+          setStart(displayStart - displayLength)
+        }
+      })
   }
 
   function processData(data) {
@@ -128,7 +146,7 @@ function Home() {
     <main role="main" className="container-fluid text-center px-0">
       <InfiniteScroll
         dataLength={items.length} //This is important field to render the next data
-        next={() => fetchData(start)}
+        next={() => fetchScroll(start)}
         hasMore={hasMore}
         loader="Loading"
         endMessage="The End (These are albums for the past year. Enjoy!)"
@@ -150,13 +168,13 @@ function Home() {
 }
 
 function Album({ data }) {
-  const [className, setClassName] = useState("thumbnail zoom");
+  const [className, setClassName] = useState('thumbnail zoom');
   const width = useWindowWidth();
 
   function useWindowWidth() {
     const [width, setWidth] = useState(window.innerWidth);
 
-    console.log(window.innerWidth, document.body.clientWidth)
+    // console.log(window.innerWidth, document.body.clientWidth)
 
     useEffect(() => {
       const handleResize = () => setWidth(window.innerWidth);
@@ -175,6 +193,7 @@ function Album({ data }) {
         href={"https://www.youtube.com/results?search_query=" + data.artist + " " + data.album}
         target="_blank" rel="noopener noreferrer">
         <ReactImageFallback
+          initialImage={ placeholderImage }
           src={data.cover + 'jpg'}
           fallbackImage={[
             data.cover + 'jpeg',
