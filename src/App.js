@@ -31,22 +31,13 @@ function Home() {
   const [items, setItems] = useState([]);
   const [start, setStart] = useState(null);
   const [hasMore, sethasMore] = useState(true);
-  
-  useEffect(() => {
-    fetchData(start);
-  }, [])
-  
-  function fetchData(displayStart) {
-    const today = moment();
 
-    const month = today.month() + 1;
-    const year = today.year();
-
-    const displayLength = 200;
-
-    const [fromYear, fromMonth, toYear, toMonth] = [year - 1, month, year, month];
-
-    const url = CORS_HOST + `https://www.metal-archives.com/search
+  const today = moment();
+  const month = today.month() + 1;
+  const year = today.year();
+  const displayLength = 200;
+  const [fromYear, fromMonth, toYear, toMonth] = [year - 1, month, year, month];
+  const url = CORS_HOST + `https://www.metal-archives.com/search
     /ajax-advanced/searching/albums/?bandName=&releaseTitle=
     &releaseYearFrom=${fromYear}&releaseMonthFrom=${fromMonth}
     &releaseYearTo=${toYear}&releaseMonthTo=${toMonth}
@@ -55,6 +46,17 @@ function Home() {
     &sEcho=1&iColumns=3&sColumns=&iDisplayStart=DISPLAYSTART
     &iDisplayLength=${displayLength}`.replace(/\n/g, '').replace(/ /g, '')
 
+  const n_col = Math.floor(window.innerWidth / THUMBNAIL_SIZE);
+  const n_row = Math.ceil(2 * window.innerHeight / THUMBNAIL_SIZE);
+  const n_load = n_col * n_row;
+
+  useEffect(() => {
+    if (items.length < n_load) {
+      fetchData()
+    }
+  }, [])
+
+  function fetchData(displayStart) {
     if (!displayStart) {
       console.log('fetch initial')
 
@@ -84,15 +86,15 @@ function Home() {
 
           console.log('fetched', data.length)
 
-          setItems(data); 
+          setItems(data);
 
           // Load enough items for infinite scrolling to work
-          const n_col = Math.floor(window.innerWidth / THUMBNAIL_SIZE);
-          const n_row = Math.ceil(2 * window.innerHeight / THUMBNAIL_SIZE);
-          const n_load = n_col * n_row;
-          if (data.length < n_load) {
-            fetchData(displayStart - displayLength)
-          }
+          // const n_col = Math.floor(window.innerWidth / THUMBNAIL_SIZE);
+          // const n_row = Math.ceil(2 * window.innerHeight / THUMBNAIL_SIZE);
+          // const n_load = n_col * n_row;
+          // if (data.length < n_load) {
+          //   fetchData(displayStart - displayLength)
+          // }
         })
     }
   }
@@ -123,7 +125,7 @@ function Home() {
   }
 
   return (
-    <main role="main" className="container-fluid text-center px-0">      
+    <main role="main" className="container-fluid text-center px-0">
       <InfiniteScroll
         dataLength={items.length} //This is important field to render the next data
         next={() => fetchData(start)}
@@ -153,7 +155,9 @@ function Album({ data }) {
 
   function useWindowWidth() {
     const [width, setWidth] = useState(window.innerWidth);
-    
+
+    console.log(window.innerWidth, document.body.clientWidth)
+
     useEffect(() => {
       const handleResize = () => setWidth(window.innerWidth);
       window.addEventListener('resize', handleResize);
@@ -161,19 +165,19 @@ function Album({ data }) {
         window.removeEventListener('resize', handleResize);
       };
     });
-    
+
     return width / (Math.floor(width / THUMBNAIL_SIZE));
   }
-  
+
   return (
     <div className={className} style={{width: width, height: width}}>
-      <a 
-        href={"https://www.youtube.com/results?search_query=" + data.artist + " " + data.album} 
+      <a
+        href={"https://www.youtube.com/results?search_query=" + data.artist + " " + data.album}
         target="_blank" rel="noopener noreferrer">
         <ReactImageFallback
           src={data.cover + 'jpg'}
           fallbackImage={[
-            data.cover + 'jpeg', 
+            data.cover + 'jpeg',
             <Empty onLoad={ () => setClassName(className + ' empty') } />
           ]}
           className="thumbnail-image"
