@@ -60,7 +60,7 @@ function Home() {
   }, []);
 
   useEffect(() => {
-    console.log('items', items.length);
+    console.log('total items', items.length);
   }, [items]);
 
   function fetchItems(displayStart, items) {
@@ -110,7 +110,7 @@ function Home() {
           sethasMore(false);
         } else {
           setItems(items => (
-            items.slice().concat(data)//.sort((a, b) => a.date < b.date).reverse()
+            items.slice().concat(data)
           ));
           setStart(displayStart - displayLength);
         }
@@ -175,8 +175,7 @@ function Album({ data }) {
     const [width, setWidth] = useState(document.body.clientWidth);
 
     useEffect(() => {
-      // console.log(document.body.clientWidth);
-      // setWidth(document.body.clientWidth);
+      setWidth(document.body.clientWidth);
       
       const handleResize = () => setWidth(document.body.clientWidth);
       window.addEventListener('resize', handleResize);
