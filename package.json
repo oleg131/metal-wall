@@ -18,7 +18,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "REACT_APP_CORS_HOST=https://cors-anywhere.herokuapp.com/ react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "REACT_APP_CORS_HOST=https://cors-anywhere.herokuapp.com/ npm run build",
