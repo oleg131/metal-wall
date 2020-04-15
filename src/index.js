@@ -1,10 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import ReactGA from 'react-ga';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import './index.css';
+
+ReactGA.initialize('UA-74405434-8');
+ReactGA.pageview(window.location.pathname + window.location.search);
 
 ReactDOM.render(<App />, document.getElementById('root'));
 
