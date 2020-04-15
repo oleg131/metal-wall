@@ -43,6 +43,5 @@
   "proxy": "http://localhost:5000",
   "devDependencies": {
     "gh-pages": "^2.2.0"
-  },
-  "homepage": "http://oleg131.github.io/metal-wall"
+  }
 }
