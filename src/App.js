@@ -1,7 +1,10 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import ReactImageFallback from "react-image-fallback";
+import Modal from './Modal';
 import moment from 'moment';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import './App.css';
 import placeholderImage from './0.png';
@@ -32,6 +35,7 @@ function Home() {
   const [items, setItems] = useState([]);
   const [start, setStart] = useState(null);
   const [hasMore, sethasMore] = useState(true);
+  const [albumId, setAlbumId] = useState();
 
   const today = moment();
   const month = today.month() + 1;
@@ -80,7 +84,7 @@ function Home() {
     console.log('fetch initial');
     return fetch(url.replace('DISPLAYSTART', 0))
       .then(res => res.json())
-      .then(function(data) {
+      .then(function (data) {
         return data.iTotalRecords;
       });
   }
@@ -89,7 +93,7 @@ function Home() {
     console.log('fetch with start', displayStart);
     return fetch(url.replace('DISPLAYSTART', displayStart))
       .then(res => res.json())
-      .then(function(data) {
+      .then(function (data) {
         if (data.aaData.length === 0) {
           return [];
         }
@@ -144,19 +148,21 @@ function Home() {
 
   return (
     <main role="main" className="container-fluid text-center px-0">
+      <Modal albumId={albumId} setAlbumId={setAlbumId} />
+      <ToastContainer />
       <InfiniteScroll
         dataLength={items.length} //This is important field to render the next data
         next={() => fetchScroll(start)}
         hasMore={hasMore}
         loader="Loading"
         endMessage="The End (These are albums for the past year. Enjoy!)"
-        style={{overflow: 'visible'}}
+        style={{ overflow: 'visible' }}
       >
         <div className="text-center">
           {
             items.map(
               (item, index) => (
-                <Album data={item} key={index} />
+                <Album data={item} key={index} setAlbumId={setAlbumId} />
               )
             )
           }
@@ -167,7 +173,7 @@ function Home() {
   );
 }
 
-function Album({ data }) {
+function Album({ data, setAlbumId }) {
   const [className, setClassName] = useState('thumbnail zoom');
   const width = useWindowWidth();
 
@@ -176,7 +182,7 @@ function Album({ data }) {
 
     useEffect(() => {
       setWidth(document.body.clientWidth);
-      
+
       const handleResize = () => setWidth(document.body.clientWidth);
       window.addEventListener('resize', handleResize);
       return () => {
@@ -187,25 +193,54 @@ function Album({ data }) {
     return width / (Math.floor(width / THUMBNAIL_SIZE));
   }
 
+  function onClick() {
+    const query = `${data.artist} ${data.album}`;
+    console.log('Searching for', query);
+    fetch(`https://itunes.apple.com/search?term=${query}&entity=album`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.resultCount > 0) {
+          console.log('Found', data.results[0]);
+          setAlbumId(data.results[0].collectionId);
+        } else {
+          console.log('No search results');
+          toast(`No search results for ${query}`, {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: false
+          });
+        }
+      })
+      .catch(e => console.log(e));
+  }
+
   return (
-    <div className={className} style={{width: width, height: width}}>
-      <a
+    <Fragment>
+      <div className={className} style={{ width: width, height: width }}>
+        {/* <a
         href={
           "https://www.youtubelongplays.com/results?search_query="
           + data.artist + " " + data.album
         }
-        target="_blank" rel="noopener noreferrer">
+        target="_blank" rel="noopener noreferrer"> */}
         <ReactImageFallback
-          initialImage={ placeholderImage }
+          initialImage={placeholderImage}
           src={data.cover + 'jpg'}
           fallbackImage={[
             data.cover + 'jpeg',
-            <Empty onLoad={ () => setClassName(className + ' empty') } />
+            data.cover + 'gif',
+            <Empty onLoad={() => setClassName(className + ' empty-image')} />
           ]}
           className="thumbnail-image"
+          onClick={onClick}
+          onError={e => console.log('fail')}
         />
-      </a>
-    </div>
+        {/* </a> */}
+      </div>
+    </Fragment>
   );
 }
 

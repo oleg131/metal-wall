@@ -5,6 +5,7 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 
 import 'bootstrap/dist/css/bootstrap.css';
+import 'spectre.css/dist/spectre.min.css';
 import './index.css';
 
 ReactGA.initialize('UA-74405434-8');
