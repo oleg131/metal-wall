@@ -5,8 +5,7 @@ ENV PATH /app/node_modules/.bin:$PATH
 COPY package.json /app/package.json
 RUN npm install --ignore-scripts
 COPY . /app
-ARG CORS_HOST
-ENV REACT_APP_CORS_HOST=$CORS_HOST
+ARG REACT_APP_CORS_HOST
 RUN export
 RUN npm run build
 
