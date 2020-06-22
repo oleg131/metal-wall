@@ -7,7 +7,7 @@ RUN npm install --ignore-scripts
 COPY . /app
 ARG REACT_APP_CORS_HOST
 ENV REACT_APP_CORS_HOST=$REACT_APP_CORS_HOST
-RUN echo Using $REACT_APP_CORS_HOST
+RUN echo "Using $REACT_APP_CORS_HOST"
 RUN npm run build
 
 # production
