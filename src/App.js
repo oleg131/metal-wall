@@ -25,7 +25,7 @@ function Header() {
   return (
     <div className="text-center my-5">
       <h2 className="header">
-        Wall of latest metal releases. Powered by Metal Archives, YouTube and React.
+        Wall of latest metal releases. Powered by Metal Archives, Odesli and React.
       </h2>
     </div>
   );
