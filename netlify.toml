@@ -1,0 +1,13 @@
+[build]
+  # Directory with the build command
+  command = "npm run build"
+  # Directory that will be deployed (output of the build)
+  publish = "build"
+  # Functions directory
+  functions = "netlify/functions"
+
+# Redirect rules for Single Page Application
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
