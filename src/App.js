@@ -1,16 +1,20 @@
-import React, { Fragment, useState, useEffect } from 'react';
-import InfiniteScroll from 'react-infinite-scroll-component';
+import React, { Fragment, useState, useEffect } from "react";
+import InfiniteScroll from "react-infinite-scroll-component";
 import ReactImageFallback from "react-image-fallback";
-import Modal from './Modal';
-import moment from 'moment';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import Modal from "./Modal";
+import moment from "moment";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-import './App.css';
-import placeholderImage from './0.png';
+import "./App.css";
+import placeholderImage from "./0.png";
 
-const CORS_HOST = process.env.REACT_APP_CORS_HOST || 'http://localhost:8080/';
 const THUMBNAIL_SIZE = 120;
+
+// Helper function to proxy requests through Netlify function
+function getProxiedUrl(url) {
+  return `/.netlify/functions/load?url=${encodeURIComponent(url)}`;
+}
 
 function App() {
   return (
@@ -25,7 +29,8 @@ function Header() {
   return (
     <div className="text-center my-5">
       <h2 className="header">
-        Wall of latest metal releases. Powered by Metal Archives, Odesli and React.
+        Wall of latest metal releases. Powered by Metal Archives, Odesli and
+        React.
       </h2>
     </div>
   );
@@ -42,107 +47,112 @@ function Home() {
   const year = today.year();
   const displayLength = 200;
   const [fromYear, fromMonth, toYear, toMonth] = [year - 1, month, year, month];
-  const url = CORS_HOST + `https://www.metal-archives.com/search
+  const apiUrl = `https://www.metal-archives.com/search
     /ajax-advanced/searching/albums/?bandName=&releaseTitle=
     &releaseYearFrom=${fromYear}&releaseMonthFrom=${fromMonth}
     &releaseYearTo=${toYear}&releaseMonthTo=${toMonth}
     &country=&location=&releaseLabelName=&releaseCatalogNumber=&releaseIdentifiers=
     &releaseRecordingInfo=&releaseDescription=&releaseNotes=&genre=&releaseType[]=1
     &sEcho=1&iColumns=3&sColumns=&iDisplayStart=DISPLAYSTART
-    &iDisplayLength=${displayLength}`.replace(/\n/g, '').replace(/ /g, '');
+    &iDisplayLength=${displayLength}`
+    .replace(/\n/g, "")
+    .replace(/ /g, "");
+  const url = getProxiedUrl(apiUrl);
 
   const n_col = Math.floor(window.innerWidth / THUMBNAIL_SIZE);
-  const n_row = Math.ceil(2 * window.innerHeight / THUMBNAIL_SIZE);
+  const n_row = Math.ceil((2 * window.innerHeight) / THUMBNAIL_SIZE);
   const n_load = n_col * n_row;
 
   useEffect(() => {
-    console.log('loading init n', n_load);
-    fetchInit().then(total => {
+    console.log("loading init n", n_load);
+    fetchInit().then((total) => {
       const initItems = [];
       fetchItems(total - displayLength, initItems);
     });
   }, []);
 
   useEffect(() => {
-    console.log('total items', items.length);
+    console.log("total items", items.length);
   }, [items]);
 
   function fetchItems(displayStart, items) {
-    fetchData(displayStart)
-      .then(data => {
-        items.push(...data);
-        if (items.length < n_load) {
-          fetchItems(displayStart - displayLength, items);
-        } else {
-          setItems(items);
-          setStart(displayStart - displayLength);
-        }
-      });
+    fetchData(displayStart).then((data) => {
+      items.push(...data);
+      if (items.length < n_load) {
+        fetchItems(displayStart - displayLength, items);
+      } else {
+        setItems(items);
+        setStart(displayStart - displayLength);
+      }
+    });
   }
 
   function fetchInit() {
-    console.log('fetch initial');
-    return fetch(url.replace('DISPLAYSTART', 0))
-      .then(res => res.json())
+    console.log("fetch initial");
+    return fetch(url.replace("DISPLAYSTART", 0))
+      .then((res) => res.json())
       .then(function (data) {
         return data.iTotalRecords;
-      });
+      })
+      .catch(console.log("fetchInit failed"));
   }
 
   function fetchData(displayStart) {
-    console.log('fetch with start', displayStart);
-    return fetch(url.replace('DISPLAYSTART', displayStart))
-      .then(res => res.json())
+    console.log("fetch with start", displayStart);
+    return fetch(url.replace("DISPLAYSTART", displayStart))
+      .then((res) => res.json())
       .then(function (data) {
         if (data.aaData.length === 0) {
           return [];
         }
 
-        data = data.aaData.map(processData).filter(a => !!a);
-        data = data.filter(a => a.date <= moment().format("YYYY-MM-DD"));
+        data = data.aaData.map(processData).filter((a) => !!a);
+        data = data.filter((a) => a.date <= moment().format("YYYY-MM-DD"));
         data.sort((a, b) => a.date < b.date).reverse();
-        console.log('fetched', data.length);
+        console.log("fetched", data.length);
 
         return data;
       });
   }
 
   function fetchScroll(displayStart) {
-    fetchData(displayStart)
-      .then(data => {
-        if (!data.length) {
-          sethasMore(false);
-        } else {
-          setItems(items => (
-            items.slice().concat(data)
-          ));
-          setStart(displayStart - displayLength);
-        }
-      });
+    fetchData(displayStart).then((data) => {
+      if (!data.length) {
+        sethasMore(false);
+      } else {
+        setItems((items) => items.slice().concat(data));
+        setStart(displayStart - displayLength);
+      }
+    });
   }
 
   function processData(data) {
-    const m = data[2].match('<!-- (.+) -->');
+    const m = data[2].match("<!-- (.+) -->");
     if (!m) {
       return null;
     }
     const date = m[1];
 
-    const el0 = document.createElement('html');
+    const el0 = document.createElement("html");
     el0.innerHTML = data[0];
-    const artist = el0.getElementsByTagName('a')[0].innerText;
+    const artist = el0.getElementsByTagName("a")[0].innerText;
 
-    const el1 = document.createElement('html');
+    const el1 = document.createElement("html");
     el1.innerHTML = data[1];
-    const album = el1.getElementsByTagName('a')[0].innerText;
+    const album = el1.getElementsByTagName("a")[0].innerText;
 
-    const as = el1.getElementsByTagName('a');
-    const url = as[0].getAttribute('href');
-    const id = url.split('/').pop();
+    const as = el1.getElementsByTagName("a");
+    const url = as[0].getAttribute("href");
+    const id = url.split("/").pop();
     const cover = `https://www.metal-archives.com/images/${id[0]}/${id[1]}/${id[2]}/${id[3]}/${id}.`;
 
     return {
-      url, id, cover, date, artist, album
+      url,
+      id,
+      cover,
+      date,
+      artist,
+      album,
     };
   }
 
@@ -156,25 +166,20 @@ function Home() {
         hasMore={hasMore}
         loader="Loading"
         endMessage="The End (These are albums for the past year. Enjoy!)"
-        style={{ overflow: 'visible' }}
+        style={{ overflow: "visible" }}
       >
         <div className="text-center">
-          {
-            items.map(
-              (item, index) => (
-                <Album data={item} key={index} setAlbumId={setAlbumId} />
-              )
-            )
-          }
+          {items.map((item, index) => (
+            <Album data={item} key={index} setAlbumId={setAlbumId} />
+          ))}
         </div>
-
       </InfiniteScroll>
     </main>
   );
 }
 
 function Album({ data, setAlbumId }) {
-  const [className, setClassName] = useState('thumbnail zoom');
+  const [className, setClassName] = useState("thumbnail zoom");
   const width = useWindowWidth();
 
   function useWindowWidth() {
@@ -184,37 +189,37 @@ function Album({ data, setAlbumId }) {
       setWidth(document.body.clientWidth);
 
       const handleResize = () => setWidth(document.body.clientWidth);
-      window.addEventListener('resize', handleResize);
+      window.addEventListener("resize", handleResize);
       return () => {
-        window.removeEventListener('resize', handleResize);
+        window.removeEventListener("resize", handleResize);
       };
     });
 
-    return width / (Math.floor(width / THUMBNAIL_SIZE));
+    return width / Math.floor(width / THUMBNAIL_SIZE);
   }
 
   function onClick() {
     const query = `${data.artist} ${data.album}`;
-    console.log('Searching for', query);
+    console.log("Searching for", query);
     fetch(`https://itunes.apple.com/search?term=${query}&entity=album`)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         if (data.resultCount > 0) {
-          console.log('Found', data.results[0]);
+          console.log("Found", data.results[0]);
           setAlbumId(data.results[0].collectionId);
         } else {
-          console.log('No search results');
+          console.log("No search results");
           toast(`No search results for ${query}`, {
             position: "top-right",
             autoClose: 3000,
             hideProgressBar: true,
             closeOnClick: true,
             pauseOnHover: false,
-            draggable: false
+            draggable: false,
           });
         }
       })
-      .catch(e => console.log(e));
+      .catch((e) => console.log(e));
   }
 
   return (
@@ -228,15 +233,15 @@ function Album({ data, setAlbumId }) {
         target="_blank" rel="noopener noreferrer"> */}
         <ReactImageFallback
           initialImage={placeholderImage}
-          src={data.cover + 'jpg'}
+          src={getProxiedUrl(data.cover + "jpg")}
           fallbackImage={[
-            data.cover + 'jpeg',
-            data.cover + 'gif',
-            <Empty onLoad={() => setClassName(className + ' empty-image')} />
+            getProxiedUrl(data.cover + "jpeg"),
+            getProxiedUrl(data.cover + "gif"),
+            <Empty onLoad={() => setClassName(className + " empty-image")} />,
           ]}
           className="thumbnail-image"
           onClick={onClick}
-          onError={e => console.log('fail')}
+          onError={(e) => console.log("fail")}
         />
         {/* </a> */}
       </div>
@@ -246,9 +251,7 @@ function Album({ data, setAlbumId }) {
 
 function Empty({ onLoad }) {
   useEffect(onLoad);
-  return (
-    <Fragment />
-  );
+  return <Fragment />;
 }
 
 export default App;
