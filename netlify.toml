@@ -2,7 +2,7 @@
   # Directory with the build command
   command = "npm run build"
   # Directory that will be deployed (output of the build)
-  publish = "build"
+  publish = "dist"
   # Functions directory
   functions = "netlify/functions"
 
